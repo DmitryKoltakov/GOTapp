@@ -231,21 +231,140 @@
 
 
 
-//ДЗ урок 100
+//ДЗ урок 100 Отрефакторить компонент charDetails, сделать его самостоятельным и независимым (как мы сделали с itemList)
 
-import React, {Component} from 'react';
+
+// import React, {Component} from 'react';
+// import './itemDetails.css';
+// import GotService from '../../services/gotService';
+// import Spinner from '../spinner';
+// import ErrorMessage from '../errorMessage';
+
+// //Этот компонент будем использовать в пропс чилдрен в characterPage.js
+// //Это одна строчка списка itamDetails
+// //Сначала мы не можем получить айтем в этом компоненте
+// //React.Children.map клонирует каждого ребенка и добавляет к нему переменную char из стейта данного компонента который туда попадает из сервера серез сервис
+// //деструктурированная переменная field это как раз то что надо вытащить из объекта с сервера
+// //label - подпись которая задается вместе с пропсами
+// const Field = ({item, field, label}) => {// Получает пропсы и записывает их в верстку 
+    
+//     return(
+//         <li className="list-group-item d-flex justify-content-between">
+//             <span className="term">{label}</span>
+//             <span>{item[field]}</span>
+//         </li>
+//     )
+// }
+
+// export {
+//     Field
+// }
+
+// export default class ItemDetails extends Component {
+//     gotService = new GotService();
+
+//     state =  {
+//         item: null,
+//         loading: true,
+//         error: false
+//     }
+
+
+//     componentDidMount(){
+//         this.updateItem();
+//     }
+
+//     componentDidUpdate(prevProps, prevState){
+//         if(this.props.itemId !== prevProps.itemId){
+//             this.updateItem();
+
+//         }
+//     }
+
+
+//     onItemDetailLoaded = (item) => {
+//         this.setState({
+//             item,
+//             loading: false,
+
+//         })
+//     }
+
+//     onError = (err) => {
+//         this.setState({
+//             error:true,
+//             loading:false
+//         })
+
+//     }
+
+//     updateItem(){
+//         const {itemId} = this.props;
+//         if(!itemId){//если из пропсов ничего не приходило то ничего не делаем
+//             return;
+//         }
+//         const {getItem} = this.props;// получили из пропсов гет дату
+//          getItem(itemId)// применяем полученную функцию в которую передаем аргументом itemId из пропсов
+
+//         .then(this.onItemDetailLoaded)
+//                 .catch(this.onError);
+            
+//     }
+
+//     render() {
+//         const {selectItem} = this.props;
+//         if (!this.state.item && this.state.error) {
+//             return <ErrorMessage/>
+//         } else if (!this.state.item) {
+//             return <span className="select-error">Please select {selectItem}</span>
+//         }
+      
+        
+
+//         if (this.state.loading) {
+//             return (
+//                 <div className="item-details rounded">
+//                     <Spinner/>
+//                 </div>
+//             )
+//         }
+//         //В дз надо будет переделать чтобы был не чар а айтем
+//         const {item} = this.state;
+//         const {name} = item;
+//         return (//компонент должен отображать инфу не только про героев
+//             // сюда будетприходить пропс чилдрен при вызове на уровень выше в characterPage.js
+//             //React.Children.map это специальный метод перебора детей
+//             //В этом переборе надо создать каждого чайлда который был передан из компонента выше
+//             //Напрямую менять нельзя, поэтому делается копия каждого чайлда
+//             //каждый элемент Field  при переборе будет получать переменную item которая приходит из стейта
+//             <div className="item-details rounded">
+//                 <h4>{name}</h4>
+//                 <ul className="list-group list-group-flush">
+//                     {
+//                         React.Children.map(this.props.children, (child) => {
+//                             return React.cloneElement(child, {item})
+//                         })
+//                     }
+//                 </ul>
+//             </div>
+//         );
+//     }
+// }
+
+
+
+
+
+//Урок 104 ДЗ Хуки реакта. Предыдущий вар рабочий
+
+
+import React, {useState,useEffect} from 'react';
 import './itemDetails.css';
 import GotService from '../../services/gotService';
 import Spinner from '../spinner';
 import ErrorMessage from '../errorMessage';
 
-//Этот компонент будем использовать в пропс чилдрен в characterPage.js
-//Это одна строчка списка itamDetails
-//Сначала мы не можем получить айтем в этом компоненте
-//React.Children.map клонирует каждого ребенка и добавляет к нему переменную char из стейта данного компонента который туда попадает из сервера серез сервис
-//деструктурированная переменная field это как раз то что надо вытащить из объекта с сервера
-//label - подпись которая задается вместе с пропсами
-const Field = ({item, field, label}) => {// Получает пропсы и записывает их в верстку 
+const Field = ({item, field, label}) => {
     
     return(
         <li className="list-group-item d-flex justify-content-between">
@@ -259,93 +378,73 @@ export {
     Field
 }
 
-export default class ItemDetails extends Component {
-    gotService = new GotService();
+function ItemDetails({itemId,getItem,selectItem,children})  {
+    const gotService = new GotService();
 
-    state =  {
-        item: null,
-        loading: true,
-        error: false
+    const [item, updateItemState] = useState(null);
+    const [loading, updateLoadingState] = useState(true);
+    const [error, updateItemError] = useState(false);
+  
+    useEffect(() =>{
+        updateItem();
+        
+    },[itemId])
+        
+    
+    function onItemDetailLoaded (item) {
+        updateItemState(item)
+        updateLoadingState(false)
     }
 
-
-    componentDidMount(){
-        this.updateItem();
+    function onError (err) {
+        updateItemError(true)
+        updateLoadingState(false)
     }
 
-    componentDidUpdate(prevProps, prevState){
-        if(this.props.itemId !== prevProps.itemId){
-            this.updateItem();
-
-        }
-    }
-
-
-    onItemDetailLoaded = (item) => {
-        this.setState({
-            item,
-            loading: false,
-
-        })
-    }
-
-    onError = (err) => {
-        this.setState({
-            error:true,
-            loading:false
-        })
-
-    }
-
-    updateItem(){
-        const {itemId} = this.props;
-        if(!itemId){//если из пропсов ничего не приходило то ничего не делаем
+   function updateItem(){
+        if(!itemId){
             return;
         }
-        const {getItem} = this.props;// получили из пропсов гет дату
-         getItem(itemId)// применяем полученную функцию в которую передаем аргументом itemId из пропсов
-
-        .then(this.onItemDetailLoaded)
-                .catch(this.onError);
+         getItem(itemId)
+        .then(onItemDetailLoaded)
+        .catch(onError);
             
     }
 
-    render() {
-        const {selectItem} = this.props;
-        if (!this.state.item && this.state.error) {
+  
+        
+        if (!item && error) {
             return <ErrorMessage/>
-        } else if (!this.state.item) {
+        } else if (!item) {
             return <span className="select-error">Please select {selectItem}</span>
         }
       
         
 
-        if (this.state.loading) {
+        if (loading) {
             return (
                 <div className="item-details rounded">
                     <Spinner/>
                 </div>
             )
         }
-        //В дз надо будет переделать чтобы был не чар а айтем
-        const {item} = this.state;
+        
+        
         const {name} = item;
-        return (//компонент должен отображать инфу не только про героев
-            // сюда будетприходить пропс чилдрен при вызове на уровень выше в characterPage.js
-            //React.Children.map это специальный метод перебора детей
-            //В этом переборе надо создать каждого чайлда который был передан из компонента выше
-            //Напрямую менять нельзя, поэтому делается копия каждого чайлда
-            //каждый элемент Field  при переборе будет получать переменную item которая приходит из стейта
+        return (
             <div className="item-details rounded">
                 <h4>{name}</h4>
                 <ul className="list-group list-group-flush">
                     {
-                        React.Children.map(this.props.children, (child) => {
+                        React.Children.map(children, (child) => {
                             return React.cloneElement(child, {item})
                         })
                     }
                 </ul>
             </div>
         );
-    }
+    
 }
+
+
+export default ItemDetails;

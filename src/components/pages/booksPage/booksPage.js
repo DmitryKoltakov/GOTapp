@@ -115,4 +115,6 @@ import {withRouter} from 'react-router-dom';// компонент высшего
         }
 }
 
+//Это компонент высшего порядка
 export default withRouter(BooksPage);// так компонент получит match location и history
+

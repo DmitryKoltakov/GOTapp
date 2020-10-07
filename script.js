@@ -1,5 +1,7 @@
 "use strict";
 
+const { default: ItemList } = require("./src/components/itemList");
+
 //lesson7 общение с пользователеи
 
 // alert('Hello'); предупреждение
@@ -7041,3 +7043,797 @@ P.S. Здесь есть несколько вариантов решения з
 
 
 //Урок 101 React Router
+// Измнения в url должны оставаться даже если у нас одностраничное приложение
+
+//React Router - это библиотека
+//Узнает какой компонент надо отобразить на экране 
+//Обновляет Url 
+
+
+
+//Урок 102. Дополнительно: Свойства по умолчанию.Default props
+//Default props это то же самое как параметрыпо умолчанию в функциях
+//если пропс не был передан по умолчанию 
+
+// RandomChar.defaultProps= {
+//     interval: 15000
+// }
+
+
+
+// //Эта херня проверяет тип данных пропсов чтобы в интервал попало именно число
+// RandomChar.propTypes ={
+//     //props - список всех проперти которые приходят в компонент
+//     //propName - имя какого то определенного проперти
+//     // component name - имя компонента(RandomChar)
+//     interval:(props, propName, componentName) => {
+//         const value = props[propName];// получаем текущее значение интервала из всех пропсов
+//         if(typeof value === 'number' && !isNaN(value)) {// если наш велью точно число
+//             return null
+//         }
+//         //если проверка не прошла то мы увидим вот такое сообщение
+//         return new TypeError(`${componentName}: ${propName}`)
+//     }
+// }
+
+//Библиотека которая сама проверяет типы приходящих пропсов
+//npm install prop-types
+// ItemList.defaultProps = {
+//     onItemSelected: () =>{}
+//     }
+
+// ItemList.propTypes ={
+//     onItemSelected:PropTypes.func,// проверяем функция ли приходящий пропс
+//     // getData:PropTypes.arrayOf(PropTypes.object)//для примера проверяем на массив оъектов
+// }
+
+////На какие совпадения можно проверять смотри в документации у них на сайте
+
+
+
+//Урок 103 Компоненты высшего порядка
+
+
+// const f = (a) => {
+//     console.log(a);
+//     return (b) => {
+//         console.log(a + b)
+//     }
+// }
+
+// f(1)(2);// двойной вызов функции в функции
+
+
+// const f = () => {
+  
+//     return ItemList;
+// }
+
+
+// //Таким образом мы отделим логику от рендерящей части
+// //компонент будет работать точно так же
+// const withData = (View, getData) => {
+//     return class extends Component{//возвращаем безымянный класс
+//         //все itemList в этом компоненте меняются на data
+//         state = {
+//             data: null,
+//             error: false
+//         }
+//         componentDidMount() {
+//             console.log(this.props);//у этого компонента все так же есть пропсы которые передааются с других компонентов            
+//             getData()
+//                 .then((data) => {
+//                     this.setState({
+//                         data,
+//                         error: false
+//                     });
+//                 })
+//                 .catch(() => {this.onError()});
+//         }
+       
+//         render(){//айтем лист примет все пропсы функции f
+//             const {data, error} = this.state;
+
+//             if(error){
+//                 return <ErrorMessage/>
+//             }
+    
+//             if(!data) {
+//                 return <Spinner/>
+//             }
+//             //Теперь передаем не ItemList а компонент который будет приходить из аргумента
+//             return <View {...this.props} data ={data}/>
+//         }
+//     }
+// }
+
+
+// const{getAllCharacters} = new gotService();
+// export default withData(ItemList, getAllCharacters);//передаем компонент айтем лист который будет подставляться в функцию аргументом и в гет дату тоже передаем функцию
+
+// //теперь можно эту штуку вынести в отдельный компонент и использовать во всем приложении
+// // нухуя не понял но очень интересно
+
+
+
+
+
+// ///Урок 104.Хуки(Не те которые жизненного цикла)
+// // Хуки - технология перехвата стандартного поведения какого то действия и его изменения
+
+
+// // Когда что то формируется динамически в этот процесс можно вмешаться и добавить свои изменения
+// //Хуки - функции которые позволяют не создавать классовых компонентов вообще
+
+// // Классовые компоненты создаются тогда когда необходимо внутреннее состояние компонентов
+
+// //В хуках есть юз стейт - заменяет стейт
+
+// //Хуки эффектов(useEffect) - комбинация лайвсайкл хуков.Срабатывает каждый раз когда компонент появляется обновляется и удаляется
+// //Это были 2 базовых хука.Есть еще хук контекста но об этом позже
+// //Можно создавать собственные хуки
+
+// //Хуки можно юзать только в компонентах - функциях а не в классах
+
+// //Хуки вызываются только на верхних уровнях
+
+
+// import React, {useState, useEffect} from 'react'
+
+
+// function App(){
+
+
+
+//     // Юз стейт нам возвращает массив поэтому его мы деструктурируем
+// const [count, setCount] = useState(0);
+// const [data, refreshData] = useState([{name:'Ivan', sex: 'male'}])
+// //count - состояние счетчика(типо state)
+// //setCount - кастомная функция. в скобочки передается что то вроде сет стейта
+// //useState(0) -хук который единственным аргументом принимает в себя начальное состояние
+// //Этот хук возвращает массив в котором 2 записи 
+// // первое - начальное состояние а второе функция которую можно назвать как угодно
+// //типо первая переменная это состояние. Второе это сет стейт
+// //setCount не объединяет старое и новое состояние в отличие от сет стейта
+// //в refreshData аргумент data это текущее состояние вроде
+
+
+// // useEffect(() => {// срабатывает каждый раз когда компонент появляется обновляется и удаляется
+  
+// //     // updateChar();
+// //     // let timerId = setInterval(updateChar, 15000);
+// //     // return () => {//когда мы возвращаем функцию из юз эффект это типо как componentWillUnmount
+// //     //     clearInterval(timerId);
+// //     // }
+// // })
+
+// //ЛУчше так не делать. Но вроде сработало
+// if (data) {
+//     useEffect(() => {
+//         console.log(data);
+//     });
+// }
+// //делай так вмето варианта выше потому что хуки должны быть на верхнем уровне вложенности
+// useEffect(() => {
+//     if (data){
+//         console.log(data);
+//     }
+    
+// });// хук юз эффект в качестве второго аргумента принимает ту часть которую надо проверять на предыдущий стейт и если он не изменился то ничего не делать как в componentDidUpdate чтобы избежать бесконечного цикла.Тамдолжно быть примитивное значение
+    //если значение не булевое строка или число то эта хрень не сработает(второй аргумент юз эффекта)
+    //если передать пустой массив то он будет говорить хуку что эффект надо выполнить только при появлении объекта или его исчезновении
+
+
+//     return(// во втором баттоне не забываем про иммутабельность и не изменяем стейт напрямую
+//         //вместо этого делаем новый массив из старого с добавлением нового объекта
+//         //пуш бы не проканал
+//         //data.map сделает верстку для каждого элемента массива data
+//         <>
+//         <div>
+//             <p>Вы кликнули {count} раз</p>
+//             <button onClick={() => setCount(count + 1)}>Кликни меня</button>
+//         </div>
+//         <div>Name:{data[0].name} , sex: {data[0].sex}</div>
+//         {data.map(item => {
+//             return (
+//                 <div>
+//                     Name:{item.name} , sex: {item.sex}
+//                 </div>
+//             )
+//         })}
+//         <button onClick={() => refreshData(data => ([...data,{name:'Alex', sex:'Male'}]))}>
+//             Добваить данные
+//         </button>
+//         </>
+//     );
+
+// }
+
+// export default App;
+
+
+
+
+
+
+
+
+//Урок 105. Основные принципы Redux
+
+// npm install redux react-redux
+// удалили все нахуй оставили только html и index.js
+//подключили бутстрап в хтмле
+//<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+
+
+// import {createStore} from 'redux';
+// console.log('Hello redux');
+// const initialState = 0;//начальное значение счетчика
+
+// const reducer = (state, action) => {
+//   //state - само состояние
+//   //action - что делать с этим состоянием
+//   if(action.type === 'INC'){//если тип экшона INC то делаем вот это
+//     return state + 1
+//   }
+//   return 0;//Если не инк то 0 выдаст
+// }
+
+//{type:'INC'} то действие которое надо совершить
+// let state = reducer(initialState,{type:'INC'});
+// console.log(state);//>>>1
+// state = reducer(state,{type:'INC'});
+// console.log(state);///>>> 2
+// state = reducer(state,{type:'INC'});
+// console.log(state);///>>> 3
+// state = reducer(state,{type:'NEINC'});
+// console.log(state);//>>> 0
+
+
+
+
+// const reducer = (state = 0, action) => {// если указан параметр по умолчанию то initialState не нужен
+
+//   switch(action.type){//множественная проверка экшонов
+//     case "INC":
+//       return state + 1
+//     default://если ничего не подошло то делаем это
+//       return state;
+//   }
+  
+// }
+
+
+// let state = reducer(undefined,{});// тут заретернит 0 по дефолту
+// console.log(state);//>>>0
+// state = reducer(state,{type:'INC'});
+// console.log(state);///>>> 1
+// state = reducer(state,{type:'INC'});
+// console.log(state);///>>> 2
+// state = reducer(state,{type:'NEINC'});
+// console.log(state);//>>> 2
+
+
+
+
+
+// и на этом этапе мы еще не использовали редакс
+//редьюсер должен зависеть только от своих аргументов
+// const reducer = (state = 0, action) => {
+
+//   switch(action.type){
+//     case "INC":
+//       return state + 1;
+//     case 'DEC':
+//       return state - 1;
+//     case 'RND'://рандомим число
+//      // return state + Math.floor(Math.random() * 10) вот так писать нельзя потому что редьсер будет зависеть от рандомной величины
+//     return state + action.value;// теперь редьюсер чист и достает рандом из экшона который передается из обработчика кнопки
+//      default:
+//       return state;
+//   }
+  
+// }
+
+// const inc = () =>{//экшон криэйтер
+//   return {
+//     type:'INC'
+//   }
+// }
+// const dec = () =>({type:'DEC'});//запись эквивалентна той что выше
+// const rnd = (value) =>{//не забываем принять велью(рандомное число)
+//   return {
+//     type:'RND',
+//     value
+//   }
+// }
+
+// const store = createStore(reducer);// в качестве аргумента эта штука принимает редьюсер. Сделает объект со своими полезными функциями
+// //вешаем обработчики на наши кнопки
+// document.getElementById('inc').addEventListener('click', () => {
+//   store.dispatch(inc())//засунули экшон криэйтер в диспатч
+// });
+
+// document.getElementById('dec').addEventListener('click', () => {
+//   store.dispatch(dec())
+// });
+
+// document.getElementById('rnd').addEventListener('click', () => {
+//   const value = Math.floor(Math.random() * 10);
+//   store.dispatch(rnd(value));//rnd (value) заретернит нам нужный экшон
+// });
+// const update = () =>{// захуячиваем стейт в верстку
+//   document.getElementById('counter').textContent = store.getState()
+// }
+// store.subscribe(update);//каждый раз когда стор изменяется будем исполнять функцию апдейт
+
+// // console.log(store.getState());// >>> 0 - текущий стейт
+// // console.log(store);//{dispatch: ƒ, subscribe: ƒ, getState: ƒ, replaceReducer: ƒ, Symbol(observable): ƒ}
+
+// // store.dispatch({type:'INC'})//вот так вызывается экшон из нашего объекта store
+// // console.log(store.getState());//>> 1
+// // //dispatch запускает редьюсер внутри стора
+
+
+// // store.subscribe(() => {//внутрь передается колбек функция.
+// //   //типо подписка.внутренняя функция будет вызываться каждый раз когда изменяется стор
+// //   console.log(store.getState());
+// // })
+// // //все разы будет показывать стейт в консоли
+// // store.dispatch({type:'INC'})
+// // store.dispatch({type:'INC'})
+// // store.dispatch({type:'INC'})
+
+
+
+
+
+
+
+//Урок 106 Figma
+//Там короче можно делать дизайны и вытаскивать оттуда css стили
+
+
+
+
+
+//107. Соединяем React и Redux
+//сделали actions.js в src
+//reducer тоже отдельно
+
+
+// import {createStore} from 'redux';
+// // console.log('Hello redux');
+// // const initialState = 0;//начальное значение счетчика
+
+// // const reducer = (state, action) => {
+// //   //state - само состояние
+// //   //action - что делать с этим состоянием
+// //   if(action.type === 'INC'){//если тип экшона INC то делаем вот это
+// //     return state + 1
+// //   }
+// //   return 0;//Если не инк то 0 выдаст
+// // }
+
+// //{type:'INC'} то действие которое надо совершить
+// // let state = reducer(initialState,{type:'INC'});
+// // console.log(state);//>>>1
+// // state = reducer(state,{type:'INC'});
+// // console.log(state);///>>> 2
+// // state = reducer(state,{type:'INC'});
+// // console.log(state);///>>> 3
+// // state = reducer(state,{type:'NEINC'});
+// // console.log(state);//>>> 0
+
+
+
+
+// // const reducer = (state = 0, action) => {// если указан параметр по умолчанию то initialState не нужен
+
+// //   switch(action.type){//множественная проверка экшонов
+// //     case "INC":
+// //       return state + 1
+// //     default://если ничего не подошло то делаем это
+// //       return state;
+// //   }
+  
+// // }
+
+
+// // let state = reducer(undefined,{});// тут заретернит 0 по дефолту
+// // console.log(state);//>>>0
+// // state = reducer(state,{type:'INC'});
+// // console.log(state);///>>> 1
+// // state = reducer(state,{type:'INC'});
+// // console.log(state);///>>> 2
+// // state = reducer(state,{type:'NEINC'});
+// // console.log(state);//>>> 2
+
+
+
+
+
+// // и на этом этапе мы еще не использовали редакс
+// //редьюсер должен зависеть только от своих аргументов
+// const reducer = (state = 0, action) => {
+
+//   switch(action.type){
+//     case "INC":
+//       return state + 1;
+//     case 'DEC':
+//       return state - 1;
+//     case 'RND'://рандомим число
+//      // return state + Math.floor(Math.random() * 10) вот так писать нельзя потому что редьсер будет зависеть от рандомной величины
+//     return state + action.value;// теперь редьюсер чист и достает рандом из экшона который передается из обработчика кнопки
+//      default:
+//       return state;
+//   }
+  
+// }
+
+// const inc = () =>{//экшон криэйтер
+//   return {
+//     type:'INC'
+//   }
+// }
+// const dec = () =>({type:'DEC'});//запись эквивалентна той что выше
+// const rnd = (value) =>{//не забываем принять велью(рандомное число)
+//   return {
+//     type:'RND',
+//     value
+//   }
+// }
+
+// const store = createStore(reducer);// в качестве аргумента эта штука принимает редьюсер. Сделает объект со своими полезными функциями
+// //вешаем обработчики на наши кнопки
+// document.getElementById('inc').addEventListener('click', () => {
+//   store.dispatch(inc())//засунули экшон криэйтер в диспатч
+// });
+
+// document.getElementById('dec').addEventListener('click', () => {
+//   store.dispatch(dec())
+// });
+
+// document.getElementById('rnd').addEventListener('click', () => {
+//   const value = Math.floor(Math.random() * 10);
+//   store.dispatch(rnd(value));//rnd (value) заретернит нам нужный экшон
+// });
+// const update = () =>{// захуячиваем стейт в верстку
+//   document.getElementById('counter').textContent = store.getState()
+// }
+// store.subscribe(update);//каждый раз когда стор изменяется будем исполнять функцию апдейт
+
+// // console.log(store.getState());// >>> 0 - текущий стейт
+// // console.log(store);//{dispatch: ƒ, subscribe: ƒ, getState: ƒ, replaceReducer: ƒ, Symbol(observable): ƒ}
+
+// // store.dispatch({type:'INC'})//вот так вызывается экшон из нашего объекта store
+// // console.log(store.getState());//>> 1
+// // //dispatch запускает редьюсер внутри стора
+
+
+// // store.subscribe(() => {//внутрь передается колбек функция.
+// //   //типо подписка.внутренняя функция будет вызываться каждый раз когда изменяется стор
+// //   console.log(store.getState());
+// // })
+// // //все разы будет показывать стейт в консоли
+// // store.dispatch({type:'INC'})
+// // store.dispatch({type:'INC'})
+// // store.dispatch({type:'INC'})
+
+
+
+
+
+//Урок 106 дз
+// import {createStore} from 'redux';
+
+// // редюсер
+// const counter = (state = 0, action) => {
+//     switch (action.type){
+//         case 'INC':
+//             return state + 1;
+//         case 'DEC':
+//             return state - 1;
+//         case 'RES':
+//             return 0;
+//         default:
+//             return state;
+//     }
+// }
+
+// //  создаем хранилище
+// let store = createStore(counter);
+
+// // Вспомогательные функции
+// const inc = () => ( {type: 'INC'} );
+// const dec = () => ( {type: 'DEC'} );
+// const res = () => ( {type: 'RES'} );
+
+// //  Проверяем нажатия кнопок
+// document.getElementById('inc').addEventListener('click', () => {
+//     store.dispatch( inc() );
+// });
+
+// document.getElementById('dec').addEventListener('click', () => {
+//     store.dispatch( dec() );
+// });
+
+// document.getElementById('res').addEventListener('click', () => {
+//     store.dispatch( res() );
+// });
+
+// //  функция обновляет counter
+// const update = () =>{
+//     document.getElementById('counter').textContent = store.getState();
+// }
+
+// // при каждом изменении
+// store.subscribe(update);
+
+
+
+
+
+//Урок 107. Соединяем React и Redux
+// import {createStore, bindActionCreators} from 'redux';
+// import counter from './reducer';// вытаскивем редьюсер
+// // import {inc,dec,res} from './actions'; // это было частично
+// import * as actions from './actions';//вытаскиваем все экшон криэйтеры и записываем их в объект actions
+
+
+
+// //вырезали редьюсер
+
+
+
+// let store = createStore(counter);
+// const {dispatch} = store;// деструктуриремся)
+
+// //функция для создания функций подобных incDispatch. ПРОПИСАЛИ ДЛЯ НАГЛЯДНОСТИ. ЕЕ МОЖНО ВЫТАЩИТЬ ИЗ РЕДАКСА
+// // const bindActionCreator = (creator, dispatch) => (...args) => {//...args это аргументы криэйтора(рест параметр). Если они есть то они передаются сюда
+// //   dispatch(creator(...args));//короче берет пришедший диспатч и запихивает в него криэйтор с его аргументами
+// // }
+
+
+// //До этого было так
+// // document.getElementById('inc').addEventListener('click', () => {
+// //     store.dispatch( inc() );
+// // });
+
+
+// //Теперь:
+// // const incDispatch = () => dispatch(inc());//захардкориваем инк диспатч
+// // const decDispatch = () => dispatch(dec());
+// // const resDispatch = () => dispatch(res());
+// // const incDispatch = bindActionCreators(inc, dispatch);// теперь через биндер то же самое.Биндер можно вытащить из редакса
+// // const decDispatch = bindActionCreators(dec, dispatch);
+// // const resDispatch = bindActionCreators(res, dispatch);
+// //теперь делаем так чтобы код не повторялся
+// // const {incDispatch, decDispatch, resDispatch} = bindActionCreators(// эта штука возвращает нам объект который потом(сразу) можно деструктурировать и вытащить готовые функции
+// //   {
+// //     incDispatch: inc,//название функции: сама функция(импортированная из экшонсов)
+// //     decDispatch: dec,
+// //     resDispatch: res
+// //   }
+// //   , dispatch);
+// //а теперь делаем так чтобы все экшонсы запихивались в этот первый объект
+// //actions который мы импортировали выглядит вот так
+// // actions = {
+// //   inc: inc,
+// //   dec: dec,
+// //   res: res
+// // }
+
+// const {inc, dec, res} = bindActionCreators(actions, dispatch);// actions мы импортировали толпой.
+//  //{inc, dec, res} - теперь обернутые в диспатч функции
+
+
+// //Вырезали экшон криэйтеры и переместили их в экшон js
+
+// //Делаем так чтобы обработчики не знали ничего о редаксе - они просто запускают попадающую в них функцию
+// // document.getElementById('inc').addEventListener('click', incDispatch);// теперь не расписываем а просто вставляем готовые диспатчи которые будут запускать редьюсер
+
+// // document.getElementById('dec').addEventListener('click', decDispatch);
+
+// // document.getElementById('res').addEventListener('click', resDispatch);//тут еще можно передавать аргументы как было с рандомом
+// document.getElementById('inc').addEventListener('click', inc);
+
+// document.getElementById('dec').addEventListener('click', dec);
+
+// document.getElementById('res').addEventListener('click', res);
+
+// const update = () =>{
+//     document.getElementById('counter').textContent = store.getState();
+// }
+
+
+// store.subscribe(update);
+
+
+
+
+
+///Теперь  копирую этот код но без объянений
+//дальше будем реакт добавлять
+//сделали counter.js
+//Ну ессно подрубаем реакт и реакт дом
+// import React from 'react';
+// import ReactDOM from 'react-dom';
+// import {createStore} from 'redux';
+// import {Provider} from 'react-redux';// ЭТА ШТУКА КОТОРАЯ НУЖНА ЧТОБЫ ПЕРЕДАВАТЬ ПАРАМЕТРЫ ПО ИЕРАРХИИ НИЖЕ 
+// import reducer from './reducer';
+// // import * as actions from './actions';
+// // import Counter from './components/counter';
+// import App  from './components/app';
+
+
+// let store = createStore(reducer);
+// // const {dispatch} = store;
+
+
+// // const {inc, dec, res} = bindActionCreators(actions, dispatch);
+
+// //Получатели и обработчики больше не нужны
+// // document.getElementById('inc').addEventListener('click', inc);
+// // document.getElementById('dec').addEventListener('click', dec);
+// // document.getElementById('res').addEventListener('click', res);
+
+// // const update = () =>{//Рендер будет срабатывать каждый раз когда срабатывает update а он в свою очеред засабскрайблен на изменения стора
+// // выбираем что зарендерить и куда
+// // передаем с пропсами обработчики(диспатчеры)
+// //Тут мы рендерим App но пропсы должны попасть в Counter
+// //store, update и subscribe всегда остаются в index.js
+// ReactDOM.render(//обернули App в провайдер чтобы передать store по иерархии куда надо(в Counter)
+// //Provider делает так чтобы любой компонент который находится внутри обернутого App имел доступ к store
+// //// connect работает в паре с Provider который дает возможность коннекту принимать данные из стора напрямую из любого места иерархии
+
+// <Provider store={store}>
+//     <App/>
+// </Provider>, document.getElementById('root'));// выбираем что зарендерить и куда
+// // }//это закрывающий тег функции апдейт которая больше не нужна
+
+
+// //Апдейт и сабскрайб не нужны теперь потому что они уже включены в Провайдер
+// // update();// первый раз прорисовываем верстку
+// // store.subscribe(update);
+
+
+// //дальше делается папка компонентс и app.js и заменяются импорты
+
+
+
+
+
+
+
+
+//Урок 108. React Context
+
+//Контекст выполнения
+
+
+//Есть спооб передавать пропсы не по цепочке а задавать из на самом верхнем уровне и использовать внизу иерархии
+
+//Есть компонет который содержит все другие компоненты
+<App>
+    {/* Обернули все в провайдер. В нем устанавливаем значение которое будем считывать в элементах ниже  */}
+    <Provider value={lang}>
+        <MainPage>
+            <Blog>
+
+            </Blog>
+        </MainPage>
+
+
+        <ContactsPage>
+            {/* Консьюмер нужен для того чтобы считать значение из провайдера и не передавать его при этом по цепочке */}
+            <Consumer>
+                {/* Внутри фигурных скобок задается функция которая принимает прпс сверху и возвращает ( отрисовывает нужный компонент) */}
+                {
+
+                    (lang)=>{
+                        return(//тут уже можно использовать значение лэнг из аргументов
+                            
+                            <Adress lang={lang}>
+
+                            </Adress>
+                        )
+                    }
+
+                }
+            </Consumer>
+        </ContactsPage>
+    </Provider>
+
+
+</App>
+
+
+//Такое часто применяется при работе с выбором языков или тем
+
+
+
+
+
+
+//Context.js - отдельный компонент
+
+// import React from 'react';
+// //В этой переменной есть Provider и Consumer
+// const MyContext = React.createContext();// вот так создается контекст
+
+// export default MyContext;
+
+// //На верхнем уровне вот так(В App.js)
+// //В компонентах которые используют контекст он импортируется
+// import MyContext from 'url';
+
+// //value всегда должен оставаться value
+// <MyContext.Provider value={"Ivan"}>
+//     <KomponentNaUrovenNize/>
+// </MyContext.Provider>
+
+
+
+// //Теперь на уровне где применяем
+// //Это способ для функционального компонента
+// import React from 'react';
+// import MyContext from 'url';
+// const Name = () =>{
+//     return (
+//         <MyContext.Consumer>
+//             {
+//                 (value) => {
+//                     return(
+//                         <div className="name">
+//                             My name is {value}
+//                         </div>
+//                     )
+//                 }
+//             }
+//         </MyContext.Consumer>
+//     )   
+// }
+
+
+// //ВТОРОЙ СПОСОБ С КЛАССОВЫМ КОМПОНЕНТОМ
+
+// //Меняется только нижний(принимающий) компонент
+// //Тут консьюмер не нужен
+// import React, {Component} from 'react';
+// import MyContext from 'url';
+
+// class Name extends Component {
+
+//     render() {
+//         return (
+
+//             < div className = "name" >
+//                 {/* Вместо value тут this.context */}
+//                  My name is {this.context} 
+//             </div>
+
+//         }
+//     }
+
+// }
+          
+// Name.contextType = MyContext;//Заклиинание конторое помещает MyContext в этот компонент чтоб его там применять как консьюмер только через this.context
+
+
+
+
+
+
+
+
+
+
+//Урок 109. Начинаем создавать новое приложение React + Redux
+
+
+
+
+
+// Сделали react-redux-food приложение и подрубили sass
+
